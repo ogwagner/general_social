@@ -195,7 +195,7 @@ const Privacy = () => {
               <p className="leading-7">
                 If you have any questions or comments about this Privacy Policy,
                 our data practices, or our compliance with applicable law,
-                please contact us at support@XXXXX
+                please contact us at XXX_SUPPORT_EMAIL
               </p>
               {/* 10. Contact ends */}
             </div>
