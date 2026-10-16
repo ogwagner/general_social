@@ -2,7 +2,11 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import { handleAdminActivity, handleAdminAuth } from "./api/admin/runtime.ts";
+import {
+  handleAdminActivity,
+  handleAdminAuth,
+  handleAdminSignup
+} from "./api/admin/runtime.ts";
 
 const adminApiPlugin = {
   configurePreviewServer(server) {
@@ -12,6 +16,8 @@ const adminApiPlugin = {
         void handleAdminAuth(request, response);
       } else if (path === "/api/admin/activity") {
         void handleAdminActivity(request, response);
+      } else if (path === "/api/admin/signup") {
+        void handleAdminSignup(request, response);
       } else {
         next();
       }
@@ -24,6 +30,8 @@ const adminApiPlugin = {
         void handleAdminAuth(request, response);
       } else if (path === "/api/admin/activity") {
         void handleAdminActivity(request, response);
+      } else if (path === "/api/admin/signup") {
+        void handleAdminSignup(request, response);
       } else {
         next();
       }

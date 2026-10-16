@@ -11,6 +11,11 @@ type VisitorActivity = {
   wallet: "metamask" | "phantom" | null;
   passwordManager: "1Password" | "Bitwarden" | null;
   lastVisitedAt: string;
+  fullNames: {
+    id: string;
+    fullName: string;
+    submittedAt: string;
+  }[];
   visits: {
     id: string;
     operatingSystem: string;
@@ -22,6 +27,7 @@ type ActivityDraft = {
   ipAddress: string;
   wallet: VisitorActivity["wallet"];
   passwordManager: VisitorActivity["passwordManager"];
+  fullNames: VisitorActivity["fullNames"];
 };
 
 const Admin = () => {
@@ -89,10 +95,13 @@ const Admin = () => {
     const query = search.trim().toLowerCase();
     if (!query) return activities;
     return activities.filter(
-      ({ ipAddress, passwordManager, visits, wallet }) =>
+      ({ fullNames, ipAddress, passwordManager, visits, wallet }) =>
         ipAddress.toLowerCase().includes(query) ||
         (wallet ?? "").toLowerCase().includes(query) ||
         (passwordManager ?? "").toLowerCase().includes(query) ||
+        fullNames.some(({ fullName }) =>
+          fullName.toLowerCase().includes(query)
+        ) ||
         visits.some((visit) =>
           visit.operatingSystem.toLowerCase().includes(query)
         )
@@ -126,6 +135,7 @@ const Admin = () => {
 
   const openActivity = (activity: VisitorActivity) => {
     setEditingActivity({
+      fullNames: activity.fullNames,
       ipAddress: activity.ipAddress,
       passwordManager: activity.passwordManager,
       wallet: activity.wallet
@@ -437,6 +447,34 @@ const Admin = () => {
                   <option value="Bitwarden">Bitwarden</option>
                 </select>
               </label>
+              <section
+                aria-labelledby="submitted-names-title"
+                className="space-y-2"
+              >
+                <h3 className="font-medium text-sm" id="submitted-names-title">
+                  Submitted full names
+                </h3>
+                {editingActivity.fullNames.length > 0 ? (
+                  <ol className="divide-y divide-gray-100 rounded-lg border border-gray-200">
+                    {editingActivity.fullNames.map((entry) => (
+                      <li
+                        className="flex items-center justify-between gap-4 px-3 py-2.5 text-sm"
+                        key={entry.id}
+                      >
+                        <span>{entry.fullName}</span>
+                        <time
+                          className="shrink-0 text-gray-500"
+                          dateTime={entry.submittedAt}
+                        >
+                          {new Date(entry.submittedAt).toLocaleString()}
+                        </time>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p className="text-gray-500 text-sm">No names submitted.</p>
+                )}
+              </section>
               <section
                 aria-labelledby="visit-history-title"
                 className="space-y-2"

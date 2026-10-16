@@ -10,6 +10,11 @@ export type VisitorActivity = {
   ipAddress: string;
   wallet: "metamask" | "phantom" | null;
   passwordManager: "1Password" | "Bitwarden" | null;
+  fullNames: {
+    id: string;
+    fullName: string;
+    submittedAt: string;
+  }[];
   visits: {
     id: string;
     operatingSystem: string;
@@ -196,6 +201,7 @@ export const handleAdminActivity = async (
     );
     if (!activity) {
       activity = {
+        fullNames: [],
         ipAddress,
         passwordManager: null,
         visits: [],
@@ -313,4 +319,74 @@ export const handleAdminActivity = async (
         Date.parse(right.lastVisitedAt) - Date.parse(left.lastVisitedAt)
     );
   sendJson(response, 200, { activities });
+};
+
+export const handleAdminSignup = async (
+  request: IncomingMessage,
+  response: ServerResponse
+) => {
+  if (request.method !== "POST") {
+    response.writeHead(405, { Allow: "POST" });
+    response.end("Method not allowed.");
+    return;
+  }
+
+  let body: unknown;
+  try {
+    body = await readJsonBody(request);
+  } catch {
+    sendJson(response, 400, { error: "Invalid signup details." });
+    return;
+  }
+
+  if (
+    typeof body !== "object" ||
+    body === null ||
+    !("fullName" in body) ||
+    typeof body.fullName !== "string"
+  ) {
+    sendJson(response, 400, { error: "Full name is required." });
+    return;
+  }
+
+  const fullName = body.fullName.trim();
+  if (!fullName || fullName.length > 100) {
+    sendJson(response, 400, {
+      error: "Full name must be between 1 and 100 characters."
+    });
+    return;
+  }
+
+  const ipAddress = getClientIp(request);
+  let activity = visitorActivities.find(
+    (entry) => entry.ipAddress === ipAddress
+  );
+  if (!activity) {
+    activity = {
+      fullNames: [],
+      ipAddress,
+      passwordManager: null,
+      visits: [],
+      wallet: null
+    };
+    visitorActivities.push(activity);
+  }
+
+  const submittedAt = new Date().toISOString();
+  activity.fullNames.unshift({
+    fullName,
+    id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    submittedAt
+  });
+  if (activity.visits.length === 0) {
+    activity.visits.unshift({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      operatingSystem: inferOperatingSystem(
+        request.headers["user-agent"] ?? ""
+      ),
+      visitedAt: submittedAt
+    });
+  }
+
+  sendJson(response, 202, { recorded: true });
 };

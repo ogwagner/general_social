@@ -246,7 +246,7 @@ const ChooseUsername = () => {
         </div>
         <div className="flex items-center space-x-3">
           <Button
-            className="w-full"
+            className="h-10 w-full"
             disabled={disabled}
             loading={isSubmitting}
             type="submit"
