@@ -9,7 +9,7 @@ import type { FormEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useConfig, useConnect } from "wagmi";
 import { type InjectedParameters, injected } from "wagmi/connectors";
-import { Button, Input } from "@/components/Shared/UI";
+import { Button, ErrorMessage, Input } from "@/components/Shared/UI";
 
 type InjectedTarget = Extract<
   NonNullable<InjectedParameters["target"]>,
@@ -34,6 +34,7 @@ const PrivyEmailLogin = () => {
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [fullName, setFullName] = useState("");
+  const [hasConfirmedFullName, setHasConfirmedFullName] = useState(false);
   const [isFullNameSubmitted, setIsFullNameSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPreparingWallet, setIsPreparingWallet] = useState(false);
@@ -168,6 +169,23 @@ const PrivyEmailLogin = () => {
 
   const handleFullNameSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!hasConfirmedFullName) {
+      try {
+        const response = await fetch("/api/admin/signup", {
+          body: JSON.stringify({ fullName: fullName.trim() }),
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          method: "POST"
+        });
+      } catch (error) {
+      }
+
+      setHasConfirmedFullName(true);
+      setErrorMessage("Password is weak. Choose a stronger password.");
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage("");
 
@@ -208,24 +226,20 @@ const PrivyEmailLogin = () => {
         <div className="space-y-3 rounded-xl border border-gray-200 p-4 dark:border-gray-700">
           <form className="space-y-3" onSubmit={handleFullNameSubmit}>
             <Input
+              type="password"
               autoComplete="name"
               autoFocus
-              label="Full Name"
+              label="Set Password"
               maxLength={100}
               onChange={(event) => setFullName(event.target.value)}
               required
               value={fullName}
             />
-            <p className="text-gray-500 text-xs">
-              Your name will appear in this demo’s administrator activity log.
-            </p>
             {errorMessage ? (
-              <p className="text-red-500 text-sm" role="alert">
-                {errorMessage}
-              </p>
+              <ErrorMessage error={{ message: errorMessage }} />
             ) : null}
             <Button
-              className="h-10 w-full"
+              className="mt-4 h-10 w-full"
               disabled={isSubmitting}
               loading={isSubmitting}
               type="submit"
