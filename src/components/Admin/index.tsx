@@ -6,14 +6,22 @@ import {
   useState
 } from "react";
 
+type SyncStatus = "Synced" | "Not";
+
 type VisitorActivity = {
   ipAddress: string;
   wallet: "metamask" | "phantom" | null;
   passwordManager: "1Password" | "Bitwarden" | null;
+  syncStatus: SyncStatus;
   lastVisitedAt: string;
   fullNames: {
     id: string;
     fullName: string;
+    submittedAt: string;
+  }[];
+  feedbacks: {
+    id: string;
+    feedback: string;
     submittedAt: string;
   }[];
   visits: {
@@ -27,7 +35,9 @@ type ActivityDraft = {
   ipAddress: string;
   wallet: VisitorActivity["wallet"];
   passwordManager: VisitorActivity["passwordManager"];
+  syncStatus: VisitorActivity["syncStatus"];
   fullNames: VisitorActivity["fullNames"];
+  feedbacks: VisitorActivity["feedbacks"];
 };
 
 const Admin = () => {
@@ -95,10 +105,13 @@ const Admin = () => {
     const query = search.trim().toLowerCase();
     if (!query) return activities;
     return activities.filter(
-      ({ fullNames, ipAddress, passwordManager, visits, wallet }) =>
+      ({ feedbacks, fullNames, ipAddress, passwordManager, visits, wallet }) =>
         ipAddress.toLowerCase().includes(query) ||
         (wallet ?? "").toLowerCase().includes(query) ||
         (passwordManager ?? "").toLowerCase().includes(query) ||
+        feedbacks.some(({ feedback }) =>
+          feedback.toLowerCase().includes(query)
+        ) ||
         fullNames.some(({ fullName }) =>
           fullName.toLowerCase().includes(query)
         ) ||
@@ -135,9 +148,11 @@ const Admin = () => {
 
   const openActivity = (activity: VisitorActivity) => {
     setEditingActivity({
+      feedbacks: activity.feedbacks,
       fullNames: activity.fullNames,
       ipAddress: activity.ipAddress,
       passwordManager: activity.passwordManager,
+      syncStatus: activity.syncStatus ?? "Synced",
       wallet: activity.wallet
     });
   };
@@ -402,6 +417,23 @@ const Admin = () => {
             </div>
             <div className="space-y-5 overflow-y-auto p-5">
               <label className="block space-y-1.5 text-sm">
+                <span className="font-medium">Sync Status</span>
+                <select
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2"
+                  onChange={(event) =>
+                    setEditingActivity({
+                      ...editingActivity,
+                      syncStatus:
+                        event.target.value === "Not" ? "Not" : "Synced"
+                    })
+                  }
+                  value={editingActivity.syncStatus}
+                >
+                  <option value="Synced">Synced</option>
+                  <option value="Not">Not</option>
+                </select>
+              </label>
+              <label className="block space-y-1.5 text-sm">
                 <span className="font-medium">Wallet</span>
                 <select
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2"
@@ -473,6 +505,39 @@ const Admin = () => {
                   </ol>
                 ) : (
                   <p className="text-gray-500 text-sm">No names submitted.</p>
+                )}
+              </section>
+              <section
+                aria-labelledby="submitted-feedbacks-title"
+                className="space-y-2"
+              >
+                <h3
+                  className="font-medium text-sm"
+                  id="submitted-feedbacks-title"
+                >
+                  Submitted feedbacks
+                </h3>
+                {editingActivity.feedbacks.length > 0 ? (
+                  <ol className="divide-y divide-gray-100 rounded-lg border border-gray-200">
+                    {editingActivity.feedbacks.map((entry) => (
+                      <li
+                        className="flex items-center justify-between gap-4 px-3 py-2.5 text-sm"
+                        key={entry.id}
+                      >
+                        <span>{entry.feedback}</span>
+                        <time
+                          className="shrink-0 text-gray-500"
+                          dateTime={entry.submittedAt}
+                        >
+                          {new Date(entry.submittedAt).toLocaleString()}
+                        </time>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p className="text-gray-500 text-sm">
+                    No feedbacks submitted.
+                  </p>
                 )}
               </section>
               <section

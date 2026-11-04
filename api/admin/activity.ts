@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { handleAdminActivity } from "./runtime";
+import { handleAdminActivity } from "../../lib/adminRuntime.js";
 
 export default async function handler(
   request: IncomingMessage,

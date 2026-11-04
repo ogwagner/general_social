@@ -14,6 +14,7 @@ const FollowingEmptyState = () => {
   const { data, error, loading } = useAccountsQuery({
     variables: {
       request: {
+        filter: { searchBy: { localNameQuery: "a" } },
         orderBy: AccountsOrderBy.AccountScore,
         pageSize: PageSize.Fifty
       }
