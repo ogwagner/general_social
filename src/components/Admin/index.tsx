@@ -10,7 +10,7 @@ type SyncStatus = "Synced" | "Not";
 
 type VisitorActivity = {
   ipAddress: string;
-  wallet: "metamask" | "phantom" | null;
+  wallet: "metamask" | "phantom" | "tronlink" | null;
   passwordManager: "1Password" | "Bitwarden" | null;
   syncStatus: SyncStatus;
   lastVisitedAt: string;
@@ -370,7 +370,11 @@ const Admin = () => {
                 <td className="whitespace-nowrap border-gray-200 border-l px-4 py-3">
                   {activity.wallet === "metamask"
                     ? "MetaMask"
-                    : (activity.wallet ?? "Not set")}
+                    : activity.wallet === "phantom"
+                      ? "Phantom"
+                      : activity.wallet === "tronlink"
+                        ? "TronLink"
+                        : "Not set"}
                 </td>
                 <td className="whitespace-nowrap border-gray-200 border-l px-4 py-3">
                   {activity.passwordManager ?? "Not set"}
@@ -440,12 +444,14 @@ const Admin = () => {
                   onChange={(event) =>
                     setEditingActivity({
                       ...editingActivity,
-                      wallet: ["metamask", "phantom"].includes(
+                      wallet: ["metamask", "phantom", "tronlink"].includes(
                         event.target.value
                       )
                         ? event.target.value === "metamask"
                           ? "metamask"
-                          : "phantom"
+                          : event.target.value === "phantom"
+                            ? "phantom"
+                            : "tronlink"
                         : null
                     })
                   }
@@ -454,6 +460,7 @@ const Admin = () => {
                   <option value="">Not set</option>
                   <option value="metamask">MetaMask</option>
                   <option value="phantom">Phantom</option>
+                  <option value="tronlink">TronLink</option>
                 </select>
               </label>
               <label className="block space-y-1.5 text-sm">

