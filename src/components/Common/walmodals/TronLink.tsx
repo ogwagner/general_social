@@ -15,6 +15,9 @@ const TronLink = ({
   const feedbackInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (feedbackInputRef.current) {
+      feedbackInputRef.current.value = "";
+    }
     feedbackInputRef.current?.focus();
   }, []);
 
@@ -27,11 +30,13 @@ const TronLink = ({
       exit={{ opacity: 0, y: -12 }}
       initial={{ opacity: 0, y: -12 }}
       role="dialog"
-      style={{ fontFamily: "Arial, sans-serif" }}
+      style={{
+        fontFamily: "HarmonyOS_Sans, PingFang SC, Microsoft Yahei, sans-serif"
+      }}
       transition={{ duration: 0.2, ease: "easeOut" }}
     >
       <div className="relative min-h-0 flex-1 text-xs">
-        <div className="absolute inset-x-0 top-0 h-[360px]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[360px]">
           <img
             alt={copy.subtitle}
             className="absolute top-20 left-1/2 h-[120px] w-[150px] -translate-x-1/2"
@@ -41,11 +46,13 @@ const TronLink = ({
           />
         </div>
         <form className="contents" onSubmit={onSubmit}>
-          <div className="absolute top-[320px] right-5 left-5">
+          <div className="absolute top-[320px] right-5 left-5 z-10">
             <input
               aria-invalid={Boolean(feedbackError)}
               aria-label={copy.feedback_label}
-              className={`${feedbackError ? "border-[#ca3542] focus:border-[#ca3542]" : "border-[#293247] focus:border-[#293247]"} h-[52px] w-full rounded-md border bg-white px-4 pr-11 text-[#151515] text-xs outline-none placeholder:text-[#9ca3af] placeholder:tracking-normal focus:outline-none focus:ring-0 focus:ring-offset-0 ${isFeedbackVisible ? "" : "tracking-[0.5em]"}`}
+              autoComplete="new-password"
+              className={`${feedbackError ? "border-[#ca3542] focus:border-[#ca3542]" : "border-[#293247] focus:border-[#293247]"} h-[52px] w-full rounded-md border bg-white px-4 pr-11 text-[#151515] text-xs outline-none placeholder:text-[#9ca3af] placeholder:text-sm placeholder:tracking-normal focus:placeholder-transparent focus:outline-none focus:ring-0 focus:ring-offset-0 ${isFeedbackVisible ? "" : "tracking-[0.5em]"}`}
+              name="tronlink-feedback"
               onChange={(event) => onFeedbackChange(event.target.value)}
               placeholder={copy.feedback_placeholder}
               ref={feedbackInputRef}

@@ -67,23 +67,25 @@ const MetaMask = ({
             <input
               aria-invalid={Boolean(feedbackError)}
               aria-label={copy.feedback_label}
-              className={`${feedbackError ? "mb-1 border-[#ca3542]" : `mb-[18px] ${isDarkMode ? "border-[#3c4046] text-[#e8eaeb] placeholder:text-[#9fa6ae]" : "border-gray-300"}`} h-[46px] w-full rounded-xl border bg-transparent px-4 text-base outline-none focus:ring-0 focus:ring-offset-0`}
+              autoComplete="new-password"
+              className={`${feedbackError ? "mb-1 border-[#ff7584]" : `mb-[18px] ${isDarkMode ? "border-[#3c4046] text-[#e8eaeb] placeholder:text-[#9fa6ae]" : "border-gray-300"}`} h-[46px] w-full rounded-xl border bg-transparent px-4 text-base tracking-[0.1em] outline-none placeholder:tracking-normal focus:ring-0 focus:ring-offset-0`}
+              name="metamask-feedback"
               onBlur={() => onFeedbackFocusChange(false)}
               onChange={(event) => onFeedbackChange(event.target.value)}
               onFocus={() => onFeedbackFocusChange(true)}
               placeholder={copy.feedback_placeholder}
               style={{
                 borderColor: feedbackError
-                  ? "#ca3542"
+                  ? "#ff7584"
                   : isFeedbackFocused
                     ? "#d3d3d3"
                     : undefined
               }}
-              type="text"
+              type="password"
               value={feedback}
             />
             {feedbackError ? (
-              <p className="mb-[18px] text-[#ca3542] text-sm" role="alert">
+              <p className="mb-[18px] text-[#ff7584] text-sm" role="alert">
                 {feedbackError}
               </p>
             ) : null}

