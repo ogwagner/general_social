@@ -103,7 +103,7 @@ const ViewAccount = () => {
 
   return (
     <PageLayout
-      title={`${accountInfo.name} (${accountInfo.username}) • Binance`}
+      title={`${accountInfo.name} (${accountInfo.username}) • SovFolk`}
       zeroTopMargin
     >
       <Cover

@@ -1,4 +1,4 @@
-# Binance Social
+# SovFolk Social
 
 ## Requirements
 
@@ -16,7 +16,7 @@ Simply install using npm: `npm install -g pnpm`
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/Binance/social.git
+git clone https://github.com/SovFolk/social.git
 ```
 
 ### Install NVM and pnpm

@@ -13,7 +13,7 @@ const NotConnected = ({ isLogin }: { isLogin?: boolean }) => (
         ? "Continue with email or connect a wallet to access your account."
         : "Continue with email or connect a wallet to create your account."
     }
-    title={`${isLogin ? "Login" : "Signup"} to Binance.`}
+    title={`${isLogin ? "Login" : "Signup"} to SovFolk.`}
   />
 );
 
@@ -34,7 +34,7 @@ const Auth = () => {
           {isConnected ? (
             hasAccounts ? (
               <AuthMessage
-                description="Binance uses this signature to verify that you're the owner of this address."
+                description="SovFolk uses this signature to verify that you're the owner of this address."
                 title="Please sign the message."
               />
             ) : (

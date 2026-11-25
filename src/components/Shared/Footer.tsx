@@ -6,18 +6,18 @@ const links = [
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
   { href: "/guidelines", label: "Guidelines" },
-  { href: "https://medium.com/@Binance", label: "Medium" },
-  { href: "/u/Binance", label: "Binance" },
-  { href: "https://github.com/Binance/social", label: "GitHub" },
+  { href: "https://medium.com/@SovFolk", label: "Medium" },
+  { href: "/u/SovFolk", label: "SovFolk" },
+  { href: "https://github.com/SovFolk/social", label: "GitHub" },
   { href: "/support", label: "Support" },
-  { href: "https://Binance", label: "Status" }
+  { href: "https://SovFolk", label: "Status" }
 ];
 
 const Footer = () => {
   return (
     <footer className="flex flex-wrap gap-x-[12px] gap-y-2 px-3 text-sm lg:px-0">
       <span className="font-bold text-gray-500 dark:text-gray-200">
-        &copy; {currentYear} Binance
+        &copy; {currentYear} SovFolk
       </span>
       {links.map(({ href, label }) => (
         <Link

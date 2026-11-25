@@ -18,11 +18,11 @@ const Copyright = () => {
               <H4 className="mb-5">Notification of Copyright Infringement</H4>
               <div className="space-y-5">
                 <p className="leading-7">
-                  Binance respects the intellectual property rights of
+                  SovFolk respects the intellectual property rights of
                   others and expects its users to do the same.
                 </p>
                 <p className="leading-7">
-                  It is Binance's policy, in appropriate circumstances and at its
+                  It is SovFolk's policy, in appropriate circumstances and at its
                   discretion, to disable the accounts of users who repeatedly
                   infringe the copyrights of others.
                 </p>
@@ -37,11 +37,11 @@ const Copyright = () => {
                   >
                     http://www.copyright.gov/legislation/dmca.pdf
                   </Link>
-                  , Binance will respond expeditiously to claims of copyright
-                  infringement committed using the Binance website, app, or other
-                  Binance owned or controlled online network services accessible
+                  , SovFolk will respond expeditiously to claims of copyright
+                  infringement committed using the SovFolk website, app, or other
+                  SovFolk owned or controlled online network services accessible
                   through a mobile device or other type of device (the "Sites")
-                  that are reported to Binance's Designated Copyright Agent,
+                  that are reported to SovFolk's Designated Copyright Agent,
                   identified in the sample notice below.
                 </p>
                 <p className="leading-7">
@@ -50,8 +50,8 @@ const Copyright = () => {
                   under copyright, please report alleged copyright infringements
                   taking place on or through the Sites by completing the
                   following DMCA Notice of Alleged Infringement and delivering
-                  it to Binance's Designated Copyright Agent. Upon receipt of the
-                  Notice as described below, Binance will take whatever action, in
+                  it to SovFolk's Designated Copyright Agent. Upon receipt of the
+                  Notice as described below, SovFolk will take whatever action, in
                   its sole discretion, it deems appropriate, including removal
                   of the challenged material from the Sites.
                 </p>
@@ -106,11 +106,11 @@ const Copyright = () => {
                   physical signature.
                 </p>
                 <p className="leading-7">
-                  Deliver this Notice, with all items completed, to Binance's
+                  Deliver this Notice, with all items completed, to SovFolk's
                   Designated Copyright Agent:
                 </p>
                 <p className="leading-7">
-                  Binance Designated Copyright Agent: Yoginth
+                  SovFolk Designated Copyright Agent: Yoginth
                 </p>
               </div>
               {/* DMCA Notice of Alleged Infringement ("Notice") ends */}
